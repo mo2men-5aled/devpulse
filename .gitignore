@@ -1,0 +1,42 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# Logs
+logs
+*.log
+*.log.*
+pnpm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor junk
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+
+# ts-node cache
+*.tsbuildinfo
+
+# CLI output files (optional but recommended)
+*.json
+*.md
+
+# Ignore reports only if they’re generated and not intended for version control
+# results.json
+# report.md
