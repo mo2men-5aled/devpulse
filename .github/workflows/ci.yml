@@ -29,5 +29,5 @@ jobs:
             - name: 🏗 Build project
               run: npm run build
 
-            - name: 🧪 Test basic benchmark
+            - name: 🧪 Run basic benchmark
               run: node dist/bin/devpulse.js run https://jsonplaceholder.typicode.com/todos/1 -c 2 -n 4
