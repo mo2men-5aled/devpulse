@@ -138,3 +138,24 @@ npm run build
 # Run development version
 npm run dev run https://api.example.com -c 5 -n 20
 ```
+
+---
+
+## 🚧 Roadmap
+- [ ] Compare mode: Benchmark two endpoints side-by-side
+- [x] UI enhancements: Progress bar, spinners, color formatting
+- [ ] HTML report export
+- [ ] Plugin system for custom metrics/reporters
+- [ ] Support for different HTTP methods (POST, PUT, DELETE, etc.)
+- [ ] Authentication support (headers, tokens)
+- [ ] Configuration file support
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+## 📜 License
+ISC

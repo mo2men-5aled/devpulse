@@ -1,10 +1,11 @@
 {
-  "name": "devpulse",
-  "version": "1.0.0",
+  "name": "devpulse-cli",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "postbuild": "node -e \"require('fs').writeFileSync('dist/bin/devpulse.js', '#!/usr/bin/env node\\nimport \\\"../src/cli.js\\\";');\" || echo postbuild completed",
     "dev": "ts-node bin/devpulse.ts",
     "start": "node dist/bin/devpulse.js"
   },
@@ -12,8 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cli-progress": "^3.11.6",
     "axios": "^1.13.2",
     "chalk": "^5.6.2",
+    "cli-progress": "^3.12.0",
     "commander": "^14.0.2",
     "fs": "^0.0.1-security"
   },
