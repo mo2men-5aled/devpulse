@@ -33,10 +33,6 @@ coverage/
 # ts-node cache
 *.tsbuildinfo
 
-# CLI output files (optional but recommended)
-*.json
-*.md
-
 # Ignore reports only if they’re generated and not intended for version control
 # results.json
 # report.md
