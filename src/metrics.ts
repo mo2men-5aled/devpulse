@@ -8,12 +8,13 @@ export interface BenchmarkMetrics {
 
 export function calculateMetrics(samples: number[]): BenchmarkMetrics {
   if (samples.length === 0) {
-    throw new Error("No samples provided to calculate metrics.");
+    return { min: 0, max: 0, avg: 0, p95: 0, p99: 0 };
   }
 
   const sorted = [...samples].sort((a, b) => a - b);
-  const min = sorted[0];
-  const max = sorted[sorted.length - 1];
+
+  const min = sorted[0]!;
+  const max = sorted[sorted.length - 1]!;
   const avg = sorted.reduce((a, b) => a + b, 0) / sorted.length;
 
   const p95 = percentile(sorted, 0.95);
@@ -23,6 +24,10 @@ export function calculateMetrics(samples: number[]): BenchmarkMetrics {
 }
 
 function percentile(sorted: number[], fraction: number): number {
+  if (sorted.length === 0) return 0;
+
   const index = Math.floor(sorted.length * fraction);
-  return sorted[Math.min(index, sorted.length - 1)];
+  const safeIndex = Math.min(index, sorted.length - 1);
+
+  return sorted[safeIndex]!;
 }

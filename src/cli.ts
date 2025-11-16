@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import runBenchmark from "./runner.ts";
-import { exportJSON, exportMarkdown } from "./reporter.ts";
+import runBenchmark from "./runner.js";
+import { exportJSON, exportMarkdown } from "./reporter.js";
 
 const program = new Command();
 

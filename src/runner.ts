@@ -1,6 +1,6 @@
 import axios from "axios";
 import chalk from "chalk";
-import { calculateMetrics } from "./metrics.ts";
+import { calculateMetrics } from "./metrics.js";
 
 
 export default async function runBenchmark(
