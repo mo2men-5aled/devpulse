@@ -21,7 +21,7 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 20
-                  registry-url: https://registry.npmjs.org
+                  registry-url: "https://registry.npmjs.org"
                   always-auth: true
 
             - name: Install deps
@@ -42,7 +42,7 @@ jobs:
               run: 'npm version patch -m "chore(release): %s"'
 
             - name: Publish
-              run: npm publish --provenance --access public
+              run: npm publish --provenance --access public --loglevel verbose
 
             - name: Push tags
               run: git push --follow-tags
