@@ -32,5 +32,9 @@
   "type": "module",
   "bin": {
     "devpulse": "./dist/bin/devpulse.js"
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ]
 }
