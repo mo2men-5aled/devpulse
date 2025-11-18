@@ -14,28 +14,34 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: 📦 Checkout repository
+            - name: Checkout
               uses: actions/checkout@v3
 
-            - name: 🟢 Setup Node.js
+            - name: Setup Node
               uses: actions/setup-node@v3
               with:
                   node-version: 20
-                  registry-url: "https://registry.npmjs.org"
+                  registry-url: https://registry.npmjs.org
 
-            - name: 📥 Install dependencies
+            - name: Install deps
               run: npm ci
 
-            - name: 🏷 Configure Git user
+            - name: Build
+              run: npm run build
+
+            - name: Check build output
+              run: ls -R dist
+
+            - name: Configure git
               run: |
                   git config user.name "github-actions[bot]"
                   git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            - name: 🔼 Bump patch version
-              run: 'npm version patch -m "Release: %s"'
+            - name: Bump version
+              run: 'npm version patch -m "chore(release): %s"'
 
-            - name: 🚀 Publish package
+            - name: Publish
               run: npm publish --provenance --access public
 
-            - name: 📤 Push version commit & tag
+            - name: Push tags
               run: git push --follow-tags
