@@ -27,7 +27,7 @@ Perfect for:
 ### Global Installation
 
 ```bash
-npm install -g devpulse-cli
+npm install -g devpulse-cli@latest
 ```
 
 ### Direct Execution
