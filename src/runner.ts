@@ -3,35 +3,26 @@ import chalk from "chalk";
 import * as cliProgress from 'cli-progress';
 import { calculateMetrics } from "./metrics.js";
 
-// Simple spinner implementation
-class Spinner {
-  private frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-  private interval: NodeJS.Timeout | null = null;
-  private currentFrame = 0;
-
-  start(message: string) {
-    process.stdout.write(`\n${chalk.blue(this.frames[this.currentFrame])} ${message}`);
-    this.interval = setInterval(() => {
-      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-      process.stdout.write(`\r${chalk.blue(this.frames[this.currentFrame])} ${message}`);
-    }, 100);
-  }
-
-  stop() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-      process.stdout.write('\r\x1b[K'); // Clear the line
-    }
-  }
-}
-
 export default async function runBenchmark(
   url: string,
   { concurrency, requests }: { concurrency: string; requests: string }
 ) {
   const concurrencyNum = Number(concurrency);
   const requestsNum = Number(requests);
+
+  // Using a mutex to ensure thread-safe access to shared variables
+  const mutex = {
+    locked: false,
+    lock: async () => {
+      while (mutex.locked) {
+        await new Promise(resolve => setTimeout(resolve, 1));
+      }
+      mutex.locked = true;
+    },
+    unlock: () => {
+      mutex.locked = false;
+    }
+  };
 
   let completed = 0;
   let failed = 0;
@@ -50,53 +41,62 @@ export default async function runBenchmark(
   // Initialize the progress bar
   progressBar.start(requestsNum, 0);
 
-  // Add an overall spinner for the entire operation
-  const spinner = new Spinner();
-  spinner.start('Benchmarking in progress...');
+  // Track start time for speed calculation
+  const startTime = Date.now();
 
-  // Use a more robust approach to handle concurrent updates to shared variables
-  const updateProgress = () => {
+  const updateProgress = async () => {
+    await mutex.lock();
     const totalCompleted = completed + failed;
-    const elapsedSeconds = performance.now() / 1000;
+    const elapsedSeconds = (Date.now() - startTime) / 1000;
     const speed = elapsedSeconds > 0 ? (totalCompleted / elapsedSeconds).toFixed(2) : '0.00';
     progressBar.update(totalCompleted, {
       speed: speed
     });
+    mutex.unlock();
   };
 
-  const run = async () => {
-    for (let i = 0; i < requestsNum / concurrencyNum; i++) {
-      const start = performance.now();
-      try {
-        await axios.get(url);
-        const end = performance.now();
-        times.push(end - start);
-      } catch (e) {
-        failed++;
-      } finally {
-        completed++; // increment regardless of success/failure to track total requests
+  // Main worker function that runs each concurrent thread
+  const runWorker = async () => {
+    for (let i = 0; i < Math.ceil(requestsNum / concurrencyNum); i++) {
+      // Check if we've already processed all requests
+      await mutex.lock();
+      const currentTotal = completed + failed;
+      mutex.unlock();
+
+      if (currentTotal >= requestsNum) {
+        break;
       }
 
-      // Update progress bar after each request
-      updateProgress();
+      const start = Date.now();
+      try {
+        await axios.get(url);
+        const end = Date.now();
+        const duration = end - start;
+
+        await mutex.lock();
+        times.push(duration);
+        completed++;
+        mutex.unlock();
+      } catch (error) {
+        await mutex.lock();
+        failed++;
+        mutex.unlock();
+      } finally {
+        await updateProgress();
+      }
     }
   };
 
-  await Promise.all(Array.from({ length: concurrencyNum }, run));
+  // Run all workers concurrently
+  await Promise.all(
+    Array.from({ length: concurrencyNum }, runWorker)
+  );
 
-  // Ensure final progress update
-  const finalTotal = completed + failed;
-  const finalElapsedSeconds = performance.now() / 1000;
-  const finalSpeed = finalElapsedSeconds > 0 ? (finalTotal / finalElapsedSeconds).toFixed(2) : '0.00';
-  progressBar.update(finalTotal, {
-    speed: finalSpeed
-  });
+  // Ensure final progress update and cleanup
+  await updateProgress();
 
   // Stop the progress bar
   progressBar.stop();
-
-  // Stop the spinner
-  spinner.stop();
 
   // Show completion message
   console.log(chalk.green('\n✅ Benchmark completed!\n'));
